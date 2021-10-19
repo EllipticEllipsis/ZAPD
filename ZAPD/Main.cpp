@@ -210,10 +210,12 @@ int main(int argc, char* argv[])
 		{
 			Globals::Instance->verboseUnaccounted = true;
 		}
+#ifdef EXPORTERS
 		else if (arg == "-se" || arg == "--set-exporter")  // Set Current Exporter
 		{
 			Globals::Instance->currentExporter = argv[++i];
 		}
+#endif
 		else if (arg == "--gcc-compat")  // GCC compatibility
 		{
 			Globals::Instance->gccCompat = true;
@@ -225,7 +227,9 @@ int main(int argc, char* argv[])
 	}
 
 	// Parse File Mode
+#ifdef EXPORTERS
 	ExporterSet* exporterSet = Globals::Instance->GetExporterSet();
+#endif
 	std::string buildMode = argv[1];
 	ZFileMode fileMode = ZFileMode::Invalid;
 
@@ -241,8 +245,10 @@ int main(int argc, char* argv[])
 		fileMode = ZFileMode::BuildBlob;
 	else if (buildMode == "e")
 		fileMode = ZFileMode::Extract;
+#ifdef EXPORTERS
 	else if (exporterSet != nullptr && exporterSet->parseFileModeFunc != nullptr)
 		exporterSet->parseFileModeFunc(buildMode, fileMode);
+#endif
 
 	if (fileMode == ZFileMode::Invalid)
 	{
@@ -250,6 +256,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
+#ifdef EXPORTERS
 	// We've parsed through our commands once. If an exporter exists, it's been set by now.
 	// Now we'll parse through them again but pass them on to our exporter if one is available.
 
@@ -258,6 +265,7 @@ int main(int argc, char* argv[])
 		for (int32_t i = 2; i < argc; i++)
 			exporterSet->parseArgsFunc(argc, argv, i);
 	}
+#endif
 
 	if (Globals::Instance->verbosity >= VerbosityLevel::VERBOSITY_INFO)
 		printf("ZAPD: Zelda Asset Processor For Decomp: %s\n", gBuildHash);
@@ -267,8 +275,10 @@ int main(int argc, char* argv[])
 	{
 		bool procFileModeSuccess = false;
 
+#ifdef EXPORTERS
 		if (exporterSet != nullptr && exporterSet->processFileModeFunc != nullptr)
 			procFileModeSuccess = exporterSet->processFileModeFunc(fileMode);
+#endif
 
 		if (!procFileModeSuccess)
 		{
@@ -401,10 +411,12 @@ bool Parse(const fs::path& xmlFilePath, const fs::path& basePath, const fs::path
 
 	if (fileMode != ZFileMode::ExternalFile)
 	{
+#ifdef EXPORTERS
 		ExporterSet* exporterSet = Globals::Instance->GetExporterSet();
 
 		if (exporterSet != nullptr && exporterSet->beginXMLFunc != nullptr)
 			exporterSet->beginXMLFunc();
+#endif
 
 		for (ZFile* file : Globals::Instance->files)
 		{
@@ -414,8 +426,10 @@ bool Parse(const fs::path& xmlFilePath, const fs::path& basePath, const fs::path
 				file->ExtractResources();
 		}
 
+#ifdef EXPORTERS
 		if (exporterSet != nullptr && exporterSet->endXMLFunc != nullptr)
 			exporterSet->endXMLFunc();
+#endif
 	}
 
 	return true;

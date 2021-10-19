@@ -323,10 +323,12 @@ void ZFile::ExtractResources()
 	MemoryStream* memStream = new MemoryStream();
 	BinaryWriter writer = BinaryWriter(memStream);
 
+#ifdef EXPORTERS
 	ExporterSet* exporterSet = Globals::Instance->GetExporterSet();
 
 	if (exporterSet != nullptr && exporterSet->beginFileFunc != nullptr)
 		exporterSet->beginFileFunc(this);
+#endif
 
 	for (ZResource* res : resources)
 	{
@@ -335,10 +337,12 @@ void ZFile::ExtractResources()
 
 		res->Save(outputPath);
 
+#ifdef EXPORTERS
 		// Check if we have an exporter "registered" for this resource type
 		ZResourceExporter* exporter = Globals::Instance->GetExporter(res->GetResourceType());
 		if (exporter != nullptr)
 			exporter->Save(res, Globals::Instance->outputPath.string(), &writer);
+#endif
 	}
 
 	if (memStream->GetLength() > 0)
@@ -351,8 +355,10 @@ void ZFile::ExtractResources()
 
 	writer.Close();
 
+#ifdef EXPORTERS
 	if (exporterSet != nullptr && exporterSet->endFileFunc != nullptr)
 		exporterSet->endFileFunc(this);
+#endif
 }
 
 void ZFile::AddResource(ZResource* res)

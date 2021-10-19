@@ -38,6 +38,7 @@ bool Globals::HasSegment(int32_t segment)
 	return std::find(segments.begin(), segments.end(), segment) != segments.end();
 }
 
+#ifdef EXPORTERS
 std::map<std::string, ExporterSet*>* Globals::GetExporterMap()
 {
 	static std::map<std::string, ExporterSet*> exporters;
@@ -70,6 +71,7 @@ ExporterSet* Globals::GetExporterSet()
 	else
 		return nullptr;
 }
+#endif
 
 bool Globals::GetSegmentedPtrName(segptr_t segAddress, ZFile* currentFile,
                                   const std::string& expectedType, std::string& declName)

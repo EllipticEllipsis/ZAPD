@@ -18,7 +18,9 @@ enum class ZFileMode
 	Extract,
 	ExternalFile,
 	Invalid,
+#ifdef EXPORTERS
 	Custom = 1000,  // Used for exporter file modes
+#endif
 };
 
 enum class ZGame

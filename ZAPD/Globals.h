@@ -15,6 +15,7 @@ enum class VerbosityLevel
 	VERBOSITY_DEBUG
 };
 
+#ifdef EXPORTERS
 typedef void (*ExporterSetFunc)(ZFile*);
 typedef bool (*ExporterSetFuncBool)(ZFileMode fileMode);
 typedef void (*ExporterSetFuncVoid)(int argc, char* argv[], int& i);
@@ -33,6 +34,7 @@ public:
 	ExporterSetFuncVoid3 beginXMLFunc = nullptr;
 	ExporterSetFuncVoid3 endXMLFunc = nullptr;
 };
+#endif
 
 class Globals
 {
@@ -63,17 +65,21 @@ public:
 	std::vector<int32_t> segments;
 	std::map<uint32_t, std::string> symbolMap;
 
+#ifdef EXPORTERS
 	std::string currentExporter;
 	static std::map<std::string, ExporterSet*>* GetExporterMap();
 	static void AddExporter(std::string exporterName, ExporterSet* exporterSet);
+#endif
 
 	Globals();
 
 	void AddSegment(int32_t segment, ZFile* file);
 	bool HasSegment(int32_t segment);
 
+#ifdef EXPORTERS
 	ZResourceExporter* GetExporter(ZResourceType resType);
 	ExporterSet* GetExporterSet();
+#endif
 
 	/**
 	 * Search in every file (and the symbol map) for the `segAddress` passed as parameter.

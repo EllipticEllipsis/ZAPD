@@ -6,6 +6,7 @@ DEPRECATION_ON ?= 1
 DEBUG ?= 0
 COPYCHECK_ARGS ?=
 LLD ?= 0
+EXPORTERS ?= 0
 
 # Use clang++ if available, else use g++
 ifeq ($(shell command -v clang++ >/dev/null 2>&1; echo $$?),0)
@@ -57,6 +58,15 @@ ifneq ($(UNAME), Darwin)
     LDFLAGS += -Wl,-export-dynamic -lstdc++fs
 endif
 
+ifneq ($(EXPORTERS),0)
+    EXPORTERS_TARGET := ExporterTest
+    LINK_EXPORTERS   := -Wl,--whole-archive ExporterTest/ExporterTest.a -Wl,--no-whole-archive
+	CXXFLAGS         += -DEXPORTERS
+else
+    EXPORTERS_TARGET :=
+	LINK_EXPORTERS   :=
+endif
+
 ZAPD_SRC_DIRS := $(shell find ZAPD -type d)
 SRC_DIRS = $(ZAPD_SRC_DIRS) lib/tinyxml2
 
@@ -104,9 +114,11 @@ build/%.o: %.cpp
 lib/libgfxd/libgfxd.a:
 	$(MAKE) -C lib/libgfxd
 
+ifneq ($(EXPORTERS),0)
 .PHONY: ExporterTest
 ExporterTest:
 	$(MAKE) -C ExporterTest
+endif
 
 .PHONY: ZAPDUtils
 ZAPDUtils:
@@ -114,5 +126,5 @@ ZAPDUtils:
 
 
 # Linking
-ZAPD.out: $(O_FILES) lib/libgfxd/libgfxd.a ExporterTest ZAPDUtils
-	$(CXX) $(CXXFLAGS) $(O_FILES) lib/libgfxd/libgfxd.a ZAPDUtils/ZAPDUtils.a -Wl,--whole-archive ExporterTest/ExporterTest.a -Wl,--no-whole-archive $(LDFLAGS) $(OUTPUT_OPTION)
+ZAPD.out: $(O_FILES) lib/libgfxd/libgfxd.a $(EXPORTERS_TARGET) ZAPDUtils
+	$(CXX) $(CXXFLAGS) $(O_FILES) lib/libgfxd/libgfxd.a ZAPDUtils/ZAPDUtils.a $(LINK_EXPORTERS) $(LDFLAGS) $(OUTPUT_OPTION)
