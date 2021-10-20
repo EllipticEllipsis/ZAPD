@@ -55,16 +55,16 @@ endif
 
 UNAME := $(shell uname)
 ifneq ($(UNAME), Darwin)
-    LDFLAGS += -Wl,-export-dynamic -lstdc++fs
+  LDFLAGS += -Wl,-export-dynamic -lstdc++fs
 endif
 
 ifneq ($(EXPORTERS),0)
-    EXPORTERS_TARGET := ExporterTest
-    LINK_EXPORTERS   := -Wl,--whole-archive ExporterTest/ExporterTest.a -Wl,--no-whole-archive
-	CXXFLAGS         += -DEXPORTERS
+  EXPORTERS_TARGET := ExporterTest
+  LINK_EXPORTERS   := -Wl,--whole-archive ExporterTest/ExporterTest.a -Wl,--no-whole-archive
+  CXXFLAGS         += -DEXPORTERS
 else
-    EXPORTERS_TARGET :=
-	LINK_EXPORTERS   :=
+  EXPORTERS_TARGET :=
+  LINK_EXPORTERS   :=
 endif
 
 ZAPD_SRC_DIRS := $(shell find ZAPD -type d)
